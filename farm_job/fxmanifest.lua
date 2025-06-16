@@ -1,7 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'Example farm job using ESX, ox_inventory, ox_lib and ox_target'
+description 'Detailed farm job using ESX, ox_inventory, ox_lib and ox_target'
 
 shared_scripts {
     '@ox_lib/init.lua',
