@@ -121,13 +121,13 @@
         <button class="close-btn" @click="close">×</button>
 
         <template v-if="ticketTableView">
-          <h2>🧾 Tabulka lístků</h2>
+          <h2>🧾 {{ translations['table_title'] }}</h2>
           <table class="ticket-table">
             <thead>
               <tr>
-                <th v-if="isBoss">Jméno</th>
-                <th>Od</th>
-                <th>Do</th>
+                <th v-if="isBoss">{{ translations['name'] }}</th>
+                <th>{{ translations['from_label'] }}</th>
+                <th>{{ translations['to_label'] }}</th>
               </tr>
             </thead>
             <tbody>
@@ -138,15 +138,15 @@
               </tr>
             </tbody>
           </table>
-          <button @click="ticketTableView = false">⬅️ Zpět</button>
+          <button @click="ticketTableView = false">⬅️ {{ translations['back'] }}</button>
         </template>
 
         <template v-else>
-          <h2>{{ isBoss ? 'Správa tomboly' : translations['your_tickets'] }}</h2>
+          <h2>{{ isBoss ? translations['manage'] : translations['your_tickets'] }}</h2>
 
           <div v-if="!isBoss">
-            <button @click="ticketTableView = true">🧾 Moje lístky</button>
-            <p>🎟 Cena jednoho losu: ${{ ticketPrice }}</p>
+            <button @click="ticketTableView = true">🧾 {{ translations['my_tickets'] }}</button>
+            <p>🎟 {{ translations['ticket_price'] }} ${{ ticketPrice }}</p>
             <input type="number" v-model.number="count" min="1" />
             <select v-model="method">
               <option value="cash">{{ translations['pay_cash'] }}</option>
@@ -156,13 +156,13 @@
           </div>
 
           <div v-else>
-            <p>🎟 Aktuální cena losu: ${{ ticketPrice }}</p>
-            <p>🎁 Prize pool: ${{ prizePool }}</p>
+            <p>🎟 {{ translations['current_price'] }} ${{ ticketPrice }}</p>
+            <p>🎁 {{ translations['prize_pool'] }} ${{ prizePool }}</p>
             <button @click="draw">{{ translations['lottery_draw'] }}</button>
             <button @click="reset">{{ translations['reset_lottery'] }}</button>
-            <input type="number" v-model.number="newPrice" min="1" placeholder="Nová cena losu">
-            <button @click="setPrice">💰 Nastavit cenu</button>
-            <button @click="ticketTableView = true">🧾 Tabulka lístků</button>
+            <input type="number" v-model.number="newPrice" min="1" :placeholder="translations['new_price']">
+            <button @click="setPrice">💰 {{ translations['set_price'] }}</button>
+            <button @click="ticketTableView = true">🧾 {{ translations['table_title'] }}</button>
           </div>
         </template>
       </div>
@@ -170,15 +170,6 @@
   </div>
 
   <script>
-    const translations = {
-      'buy_tickets': 'Koupit losy',
-      'pay_cash': 'Hotově',
-      'pay_bank': 'Z účtu',
-      'your_tickets': 'Tvoje losy',
-      'lottery_draw': 'Slosovat výherce',
-      'reset_lottery': 'Uzavřít tombolu'
-    }
-
     const app = Vue.createApp({
       data() {
         return {
@@ -193,7 +184,7 @@
           newPrice: '',
           ticketPrice: 0,
           ticketTableView: false,
-          translations
+          translations: {}
         }
       },
       methods: {
@@ -201,6 +192,7 @@
           this.job = data.job
           this.isBoss = !!data.isBoss
           this.ticketPrice = data.ticketPrice || 0
+          this.translations = data.translations || {}
           this.show = true
           this.tickets = []
           this.entries = []

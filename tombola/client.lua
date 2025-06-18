@@ -1,5 +1,13 @@
 ESX = exports["es_extended"]:getSharedObject()
 
+local function _T(key, ...)
+    local locale = Locales[Config.Locale] or {}
+    local str = locale[key] or key
+    if ... then
+        return str:format(...)
+    end
+    return str
+end
 
 local function RegisterNPC(job, data)
     local model = data.model
@@ -15,7 +23,7 @@ local function RegisterNPC(job, data)
         {
             name = 'tombola_target_' .. job,
             icon = 'fa-solid fa-ticket',
-            label = 'Otevřít tombolu',
+            label = _T('open_label'),
             distance = 2.5,
             canInteract = function()
                 return true
@@ -29,7 +37,8 @@ local function RegisterNPC(job, data)
                                 action = 'openUI',
                                 job = job,
                                 isBoss = result.isBoss,
-                                ticketPrice = result.ticketPrice or 0
+                                ticketPrice = result.ticketPrice or 0,
+                                translations = Locales[Config.Locale]
                             })
 
                             if result.isBoss then
@@ -39,7 +48,7 @@ local function RegisterNPC(job, data)
                                 loadTickets(job)
                             end
                         else
-                            lib.notify({ type = 'error', description = 'Nemáš přístup.' })
+                            lib.notify({ type = 'error', description = _T('access_denied') })
                         end
                     end, job)
                 else
@@ -76,8 +85,8 @@ end
 
 RegisterNUICallback('confirmReset', function(data, cb)
     local result = lib.alertDialog({
-        header = 'Potvrzení',
-        content = 'Opravdu chceš uzavřít tombolu?',
+        header = _T('confirm_title'),
+        content = _T('confirm_reset'),
         centered = true,
         cancel = true
     })
