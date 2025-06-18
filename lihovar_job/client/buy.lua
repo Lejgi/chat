@@ -15,7 +15,7 @@ local function createShop()
         {
             name = "lihovar_shop_target",
             icon = Config.ShopNPC.icon,
-            label = Config.ShopNPC.targetLabel,
+            label = _L(Config.ShopNPC.targetLabel),
             canInteract = function(entity, distance, coords, name)
                 return ESX.GetPlayerData().job.name == Config.ShopNPC.requiredJob
             end,
@@ -23,13 +23,13 @@ local function createShop()
                 local options = {}
                 for _, item in pairs(Config.ShopNPC.items) do
                     table.insert(options, {
-                        title = (item.label or item.name) .. " ($" .. item.price .. ")",
+                        title = (_L(item.label) or item.name) .. " ($" .. item.price .. ")",
                         icon = 'cart-shopping',
                         onSelect = function()
-                            local input = lib.inputDialog('Nákup: ' .. item.label, {
+                            local input = lib.inputDialog(_L('Nákup: ') .. _L(item.label), {
                                 {
                                     type = 'number',
-                                    label = 'Kolik chceš koupit?',
+                                    label = _L('Kolik chceš koupit?'),
                                     default = 1,
                                     min = 1
                                 }
@@ -44,7 +44,7 @@ local function createShop()
 
                 lib.registerContext({
                     id = 'lihovar_shop_menu',
-                    title = 'lihovar obchod',
+                    title = _L('lihovar obchod'),
                     options = options
                 })
 

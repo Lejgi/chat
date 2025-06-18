@@ -1,5 +1,34 @@
 Config = {}
 
+Config.Locale = 'en'
+Config.Lang = {
+    en = {
+        ['Sber Obilí'] = 'Gather Grain',
+        ['Vyroba pivovar'] = 'Brewery',
+        ['Koupe surovin'] = 'Buy Supplies',
+        ['Prodej produktu'] = 'Sell Products',
+        ['Sesbírat rostlinu'] = 'Harvest plant',
+        ['Umýváš láhve'] = 'Washing bottles',
+        ['Umít láhve'] = 'Wash bottles',
+        ['Kolik chceš koupit?'] = 'How many do you want to buy?',
+        ['Kolik chceš prodat?'] = 'How many do you want to sell?',
+        ['Nemáš nic na prodej.'] = 'Nothing to sell.',
+        ['Nákup: '] = 'Purchase: ',
+        ['Prodej: '] = 'Sell: ',
+        ['Výkup surovin'] = 'Material Buyer',
+        ['pivovar obchod'] = 'Brewery Shop',
+        ['Destilace Piva'] = 'Beer Brewing',
+        ['Výroba Piva'] = 'Brew Beer',
+        ['Probíhá výroba...'] = 'Processing...'
+    },
+    cz = {}
+}
+
+function _L(key)
+    local lang = Config.Lang[Config.Locale] or {}
+    return lang[key] or key
+end
+
 Config.RequiredJob = "pivovar"
 
 Config.HarvestCenter = vector3(255.1872, 6457.7681, 31.4509)

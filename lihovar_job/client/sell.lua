@@ -15,7 +15,7 @@ local function createBuyer()
         {
             name = "lihovar_buyer_target",
             icon = Config.BuyerNPC.icon,
-            label = Config.BuyerNPC.targetLabel,
+            label = _L(Config.BuyerNPC.targetLabel),
             canInteract = function(entity, distance, coords, name)
                 return ESX.GetPlayerData().job.name == Config.BuyerNPC.requiredJob
             end,
@@ -25,14 +25,14 @@ local function createBuyer()
                     local count = exports.ox_inventory:Search('count', item.name)
                     if count and count > 0 then
                         table.insert(options, {
-                            title = ('%s ($%s / ks)'):format(item.label, item.price),
-                            description = ('Máš %s ks'):format(count),
+                        title = ('%s ($%s / ks)'):format(_L(item.label), item.price),
+                        description = (_L('Máš %s ks')):format(count),
                             icon = 'dollar-sign',
                             onSelect = function()
-                                local input = lib.inputDialog('Prodej: ' .. item.label, {
+                                local input = lib.inputDialog(_L('Prodej: ') .. _L(item.label), {
                                     {
                                         type = 'number',
-                                        label = 'Kolik chceš prodat?',
+                                        label = _L('Kolik chceš prodat?'),
                                         default = 1,
                                         min = 1,
                                         max = count
@@ -48,13 +48,13 @@ local function createBuyer()
                 end
 
                 if #options == 0 then
-                    lib.notify({ type = 'error', description = 'Nemáš nic na prodej.' })
+                    lib.notify({ type = 'error', description = _L('Nemáš nic na prodej.') })
                     return
                 end
 
                 lib.registerContext({
                     id = 'lihovar_sell_menu',
-                    title = 'Výkup surovin',
+                    title = _L('Výkup surovin'),
                     options = options
                 })
 

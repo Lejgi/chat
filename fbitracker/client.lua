@@ -26,7 +26,7 @@ function startTrackerRemovalMinigame(type, id)
     if success then
         TriggerServerEvent('fbi:completeTrackerRemoval', type, id)
     else
-        lib.notify({title = 'GPS Detector', description = '❌ Nepodařilo se odstranit tracker!', type = 'error'})
+        lib.notify({title = 'GPS Detector', description = _L('❌ Nepodařilo se odstranit tracker!'), type = 'error'})
     end
 end
 
@@ -36,7 +36,7 @@ end
 RegisterCommand('installgps', function()
     local player = ESX.GetPlayerData()
     if player.job.name ~= Config.RequiredJob then
-        lib.notify({title = 'FBI', description = '🚫 Nemáš oprávnění instalovat GPS!', type = 'error'})
+        lib.notify({title = 'FBI', description = _L('🚫 Nemáš oprávnění instalovat GPS!'), type = 'error'})
         return
     end
 
@@ -55,7 +55,7 @@ RegisterCommand('installgps', function()
     end
 
     if #nearbyPlayers == 0 then
-        lib.notify({title = 'FBI', description = '🚫 Nikdo v blízkosti.', type = 'error'})
+        lib.notify({title = 'FBI', description = _L('🚫 Nikdo v blízkosti.'), type = 'error'})
         return
     end
 
@@ -71,7 +71,7 @@ RegisterCommand('installgps', function()
 
     lib.registerContext({
         id = 'fbi_install_gps_menu',
-        title = '📡 Instalace GPS Trackeru',
+        title = _L('📡 Instalace GPS Trackeru'),
         options = options
     })
     lib.showContext('fbi_install_gps_menu')
@@ -83,7 +83,7 @@ CreateThread(function()
         {
             name = 'install_gps_vehicle',
             icon = 'fa-solid fa-location-crosshairs',
-            label = '🚗 Nainstalovat GPS Tracker na vozidlo',
+            label = _L('🚗 Nainstalovat GPS Tracker na vozidlo'),
             canInteract = function(entity)
                 local player = ESX.GetPlayerData()
                 return player.job.name == Config.RequiredJob
@@ -100,16 +100,16 @@ end)
 -- Hlavní tablet
 lib.registerContext({
     id = 'fbi_tablet_main',
-    title = '📂 FBI Tablet',
+    title = _L('📂 FBI Tablet'),
     options = {
         {
-            title = '📂 Sledování osob',
+                title = _L('📂 Sledování osob'),
             onSelect = function()
                 TriggerServerEvent('fbi:getActiveGpsTaps', 'gps_person')
             end
         },
         {
-            title = '🚗 Sledování vozidel',
+                title = _L('🚗 Sledování vozidel'),
             onSelect = function()
                 TriggerServerEvent('fbi:getActiveGpsTaps', 'gps_vehicle')
             end
@@ -128,7 +128,7 @@ CreateThread(function()
             {
                 name = 'open_fbi_tablet',
                 icon = 'fa-solid fa-tablet-screen-button',
-                label = '📂 Otevřít FBI Tablet',
+            label = _L('📂 Otevřít FBI Tablet'),
                 canInteract = function()
                     local player = ESX.GetPlayerData()
                     return player.job.name == Config.RequiredJob
@@ -144,7 +144,7 @@ CreateThread(function()
         {
             name = 'install_gps',
             icon = 'fa-solid fa-location-crosshairs',
-            label = '📡 Nainstalovat GPS Tracker',
+            label = _L('📡 Nainstalovat GPS Tracker'),
             canInteract = function()
                 local player = ESX.GetPlayerData()
                 return player.job.name == Config.RequiredJob
@@ -162,7 +162,7 @@ RegisterCommand('fbitablet', function()
     if player.job.name == Config.RequiredJob then
         lib.showContext('fbi_tablet_main')
     else
-        lib.notify({title = 'FBI', description = '🚫 Nemáš přístup k FBI Tabletu!', type = 'error'})
+        lib.notify({title = 'FBI', description = _L('🚫 Nemáš přístup k FBI Tabletu!'), type = 'error'})
     end
 end)
 
@@ -177,12 +177,12 @@ RegisterNetEvent('fbi:updatePlayerTrackerBlip', function(trackerId, x, y, z, typ
             SetBlipSprite(blip, 225)
             SetBlipColour(blip, 2)
             BeginTextCommandSetBlipName('STRING')
-            AddTextComponentString('🚗 Sledované vozidlo')
+            AddTextComponentString(_L('🚗 Sledované vozidlo'))
         else
             SetBlipSprite(blip, 480)
             SetBlipColour(blip, 1)
             BeginTextCommandSetBlipName('STRING')
-            AddTextComponentString('🎯 Sledovaná osoba')
+            AddTextComponentString(_L('🎯 Sledovaná osoba'))
         end
 
         EndTextCommandSetBlipName(blip)
@@ -240,7 +240,7 @@ RegisterNetEvent('fbi:showTablet', function(taps, tapType)
                             onSelect = function()
                                 TriggerServerEvent('fbi:deleteGpsTracker', tap.id, tap.target_charid)
                                 TriggerEvent('fbi:removePlayerTrackerBlip', tap.target_charid)
-                                lib.notify({title = 'FBI', description = '✅ Tracker odstraněn.', type = 'success'})
+                                lib.notify({title = 'FBI', description = _L('✅ Tracker odstraněn.'), type = 'success'})
                             end
                         }
                     }
@@ -252,7 +252,7 @@ RegisterNetEvent('fbi:showTablet', function(taps, tapType)
 
     lib.registerContext({
         id = 'fbi_tap_tablet_' .. tapType,
-        title = tapType == 'gps_person' and '📂 Sledování osob' or '🚗 Sledování vozidel',
+        title = tapType == 'gps_person' and _L('📂 Sledování osob') or _L('🚗 Sledování vozidel'),
         options = options
     })
     lib.showContext('fbi_tap_tablet_' .. tapType)
@@ -275,7 +275,7 @@ RegisterNetEvent('fbi:scanNearbyVehicle', function()
         local plate = GetVehicleNumberPlateText(nearbyVehicle)
         startTrackerRemovalMinigame('vehicle', plate)
     else
-        lib.notify({title = 'GPS Detector', description = '❌ Žádné vozidlo poblíž.', type = 'error'})
+        lib.notify({title = 'GPS Detector', description = _L('❌ Žádné vozidlo poblíž.'), type = 'error'})
     end
 end)
 
@@ -284,16 +284,16 @@ end)
 exports('useGpsDetector', function(data, slot)
     lib.registerContext({
         id = 'gps_detector_menu',
-        title = '🛰️ Vyber akci s GPS Detektorem',
+        title = _L('🛰️ Vyber akci s GPS Detektorem'),
         options = {
             {
-                title = '🎯 Skenuj hráče',
+                title = _L('🎯 Skenuj hráče'),
                 onSelect = function()
                     TriggerServerEvent('fbi:checkTrackerOnPlayer')
                 end
             },
             {
-                title = '🚗 Skenuj vozidlo',
+                title = _L('🚗 Skenuj vozidlo'),
                 onSelect = function()
                     TriggerEvent('fbi:scanNearbyVehicle')
                 end
@@ -332,10 +332,10 @@ end)
 RegisterNetEvent('fbi:showTrackerFound', function(type)
     lib.registerContext({
         id = 'fbi_tracker_found',
-        title = '🔍 Tracker Detected',
+        title = _L('🔍 Tracker Detected'),
         options = {
             {
-                title = '❌ Pokusit se odstranit tracker',
+                title = _L('❌ Pokusit se odstranit tracker'),
                 onSelect = function()
                     startTrackerRemovalMinigame(type, nil)
                 end

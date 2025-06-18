@@ -3,10 +3,10 @@ local blips = {}
 
 local function createBlips()
     local locations = {
-        { label = "Sber Obilí", coords = vec3(349.99, 6517.27, 28.6), sprite = 496, color = 25 },
-        { label = "Vyroba lihovar", coords = vec3(2913.0964, 4475.8999, 48.3450), sprite = 566, color = 1 },
-        { label = "Koupe surovin", coords = vec3(-56.9761, 6521.2544, 31.4908), sprite = 566, color = 1 },
-        { label = "Prodej produktu", coords = vec3(3798.9663, 4446.5811, 4.3378), sprite = 566, color = 1 }
+        { label = _L('Sber Obilí'), coords = vec3(349.99, 6517.27, 28.6), sprite = 496, color = 25 },
+        { label = _L('Vyroba lihovar'), coords = vec3(2913.0964, 4475.8999, 48.3450), sprite = 566, color = 1 },
+        { label = _L('Koupe surovin'), coords = vec3(-56.9761, 6521.2544, 31.4908), sprite = 566, color = 1 },
+        { label = _L('Prodej produktu'), coords = vec3(3798.9663, 4446.5811, 4.3378), sprite = 566, color = 1 }
     }
 
     for _, loc in pairs(locations) do
