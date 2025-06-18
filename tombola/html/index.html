@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Tombola UI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/vue@3"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: transparent;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .panel {
+      background: #1e1e2f;
+      color: #fff;
+      border-radius: 12px;
+      padding: 25px 30px;
+      width: 500px;
+      max-width: 90vw;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      animation: fadeIn 0.3s ease;
+      position: relative;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      background: #2c2c3f;
+      border: none;
+      color: white;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      background: #4e8cff;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #3c6fd9;
+    }
+
+    .ticket-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .ticket-table th, .ticket-table td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #444;
+    }
+
+    .ticket-table th {
+      background-color: #2a2a40;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div v-if="show" class="overlay">
+      <div class="panel">
+        <button class="close-btn" @click="close">×</button>
+
+        <template v-if="ticketTableView">
+          <h2>🧾 Tabulka lístků</h2>
+          <table class="ticket-table">
+            <thead>
+              <tr>
+                <th v-if="isBoss">Jméno</th>
+                <th>Od</th>
+                <th>Do</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="entry in isBoss ? entries : tickets" :key="entry.range_start">
+                <td v-if="isBoss">{{ entry.name }}</td>
+                <td>{{ entry.range_start }}</td>
+                <td>{{ entry.range_end }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <button @click="ticketTableView = false">⬅️ Zpět</button>
+        </template>
+
+        <template v-else>
+          <h2>{{ isBoss ? 'Správa tomboly' : translations['your_tickets'] }}</h2>
+
+          <div v-if="!isBoss">
+            <button @click="ticketTableView = true">🧾 Moje lístky</button>
+            <p>🎟 Cena jednoho losu: ${{ ticketPrice }}</p>
+            <input type="number" v-model.number="count" min="1" />
+            <select v-model="method">
+              <option value="cash">{{ translations['pay_cash'] }}</option>
+              <option value="bank">{{ translations['pay_bank'] }}</option>
+            </select>
+            <button @click="buy">{{ translations['buy_tickets'] }}</button>
+          </div>
+
+          <div v-else>
+            <p>🎟 Aktuální cena losu: ${{ ticketPrice }}</p>
+            <p>🎁 Prize pool: ${{ prizePool }}</p>
+            <button @click="draw">{{ translations['lottery_draw'] }}</button>
+            <button @click="reset">{{ translations['reset_lottery'] }}</button>
+            <input type="number" v-model.number="newPrice" min="1" placeholder="Nová cena losu">
+            <button @click="setPrice">💰 Nastavit cenu</button>
+            <button @click="ticketTableView = true">🧾 Tabulka lístků</button>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const translations = {
+      'buy_tickets': 'Koupit losy',
+      'pay_cash': 'Hotově',
+      'pay_bank': 'Z účtu',
+      'your_tickets': 'Tvoje losy',
+      'lottery_draw': 'Slosovat výherce',
+      'reset_lottery': 'Uzavřít tombolu'
+    }
+
+    const app = Vue.createApp({
+      data() {
+        return {
+          job: null,
+          isBoss: false,
+          show: false,
+          count: 1,
+          method: 'cash',
+          tickets: [],
+          entries: [],
+          prizePool: 0,
+          newPrice: '',
+          ticketPrice: 0,
+          ticketTableView: false,
+          translations
+        }
+      },
+      methods: {
+        openUI(data) {
+          this.job = data.job
+          this.isBoss = !!data.isBoss
+          this.ticketPrice = data.ticketPrice || 0
+          this.show = true
+          this.tickets = []
+          this.entries = []
+          this.prizePool = 0
+          this.ticketTableView = false
+        },
+        buy() {
+          fetch(`https://${GetParentResourceName()}/buyTickets`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ job: this.job, count: this.count, method: this.method })
+          })
+        },
+        draw() {
+          fetch(`https://${GetParentResourceName()}/drawWinner`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ job: this.job })
+          })
+        },
+        reset() {
+          fetch(`https://${GetParentResourceName()}/confirmReset`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ job: this.job })
+          })
+        },
+        setPrice() {
+          fetch(`https://${GetParentResourceName()}/setTicketPrice`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ job: this.job, price: this.newPrice })
+          })
+        },
+        close() {
+          fetch(`https://${GetParentResourceName()}/closeUI`, {
+            method: 'POST' })
+          this.show = false
+        }
+      },
+      mounted() {
+        window.addEventListener('message', (event) => {
+          const data = event.data
+
+          if (data.action === 'openUI') this.openUI(data)
+          if (data.action === 'setTickets') this.tickets = data.tickets
+          if (data.action === 'setAllTickets') this.entries = data.entries
+          if (data.action === 'setPrizePool') this.prizePool = data.pool
+          if (data.action === 'updatePrice') this.ticketPrice = data.price
+        })
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.show) {
+            if (this.ticketTableView) {
+              this.ticketTableView = false
+            } else {
+              this.close()
+            }
+          }
+        })
+      }
+    })
+
+    app.mount('#app')
+  </script>
+</body>
+</html>
