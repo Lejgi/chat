@@ -1,6 +1,15 @@
 local oxmysql = exports.oxmysql
 ESX = exports['es_extended']:getSharedObject()
 
+local function _T(key, ...)
+    local locale = Locales[Config.Locale] or {}
+    local str = locale[key] or key
+    if ... then
+        return str:format(...)
+    end
+    return str
+end
+
 lib.callback.register('tombola:canOpen', function(source, job)
     local xPlayer = ESX.GetPlayerFromId(source)
     if not xPlayer then return { allowed = false } end
@@ -70,7 +79,7 @@ RegisterNetEvent('tombola:buyTickets', function(job, count, method)
 
         TriggerClientEvent('ox_lib:notify', src, {
             type = 'success',
-            description = ('Koupil sis %d los(ů)'):format(count)
+            description = _T('bought_tickets', count)
         })
     end)
 end)
@@ -83,7 +92,7 @@ RegisterNetEvent('tombola:reset', function(job)
     oxmysql:execute('DELETE FROM lottery_tickets WHERE job = ?', {job})
     TriggerClientEvent('ox_lib:notify', src, {
         type = 'success',
-        description = 'Tombola se resetuje'
+        description = _T('resetting')
     })
 end)
 
@@ -127,7 +136,7 @@ RegisterNetEvent('tombola:setTicketPrice', function(job, price)
 
     TriggerClientEvent('ox_lib:notify', src, {
         type = 'success',
-        description = ('Cena nastavena na $%d'):format(price)
+        description = _T('price_set', price)
     })
 
     TriggerClientEvent('tombola:updateTicketPrice', src, price)
