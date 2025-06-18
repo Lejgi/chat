@@ -1,0 +1,67 @@
+
+['cukr'] = {
+    label = 'Cukr',
+    weight = 1,
+    stack = true,
+    close = true,
+},
+['ovoce'] = {
+    label = 'Ovoce',
+    weight = 1,
+    stack = true,
+    close = true,
+},
+['obili'] = {
+    label = 'Obilí',
+    weight = 1,
+    stack = true,
+    close = true,
+},
+['bylinky'] = {
+    label = 'Bylinky',
+    weight = 1,
+    stack = true,
+    close = true,
+},
+['kanystrvody'] = {
+    label = 'Kanystr vody',
+    weight = 1,
+    stack = true,
+    close = true,
+},
+['gin'] = {
+    label = 'Láhev Ginu',
+    weight = 2,
+    stack = true,
+    close = true,
+},
+['slivovice'] = {
+    label = 'Láhev Švestkovice',
+    weight = 2,
+    stack = true,
+    close = true,
+},
+['whisky'] = {
+    label = 'Láhev Whiskey',
+    weight = 2,
+    stack = true,
+    close = true,
+},
+['vodka'] = {
+    label = 'Láhev Vodky',
+    weight = 2,
+    stack = true,
+    close = true,
+},
+['rhum'] = {
+    label = 'Láhev Rumu',
+    weight = 2,
+    stack = true,
+    close = true,
+},
+['corona'] = {
+    label = 'Corona Beer',
+    weight = 2,
+    stack = true,
+    close = true,
+},
