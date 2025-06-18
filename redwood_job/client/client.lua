@@ -27,10 +27,10 @@ local icons = {
 }
 
 local labels = {
-    process = "Zpracování tabáku",
-    cigarettes = "Výroba cigaret",
-    cigars = "Výroba doutníků",
-    pack = "Balení produktů"
+    process = _L('Zpracování tabáku'),
+    cigarettes = _L('Výroba cigaret'),
+    cigars = _L('Výroba doutníků'),
+    pack = _L('Balení')
 }
 
 local craftingZoneIds = {}
@@ -57,12 +57,12 @@ local function registerCraftingTargets()
             debug = false,
             options = {{
                 icon = icons[zone.type] or "fa-solid fa-cogs",
-                label = labels[zone.type] or "Výroba",
+                label = labels[zone.type] or _L('Výroba'),
                 onSelect = function()
                     local menuId = 'redwood_menu_' .. zone.type
                     lib.registerContext({
                         id = menuId,
-                        title = labels[zone.type] or zone.label,
+                        title = labels[zone.type] or _L(zone.label),
                         options = Config.CraftOptions[zone.type] or {}
                     })
                     lib.showContext(menuId)
@@ -86,7 +86,7 @@ RegisterNetEvent('redwood:playCraftAnim', function(type)
 
     lib.progressBar({
         duration = duration,
-        label = 'Probíhá výroba...',
+        label = _L('Probíhá výroba...'),
         useWhileDead = false,
         canCancel = false,
         disable = {

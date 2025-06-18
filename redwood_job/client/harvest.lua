@@ -42,7 +42,7 @@ function SpawnPlants()
         exports.ox_target:addLocalEntity(plant, {
             {
                 icon = "fas fa-seedling",
-                label = "Sesbírat tabák",
+                label = _L('Sesbírat tabák'),
                 canInteract = function(entity, distance, coords, name)
                     return ESX.GetPlayerData().job.name == Config.RequiredJob
                 end,

@@ -1,5 +1,40 @@
 Config = {}
 
+-- Language settings
+Config.Locale = 'en'
+Config.Lang = {
+    en = {
+        ['Sber Obilí'] = 'Gather Grain',
+        ['Vyroba lihovar'] = 'Distillery',
+        ['Koupe surovin'] = 'Buy Supplies',
+        ['Prodej produktu'] = 'Sell Products',
+        ['Prodej surovin'] = 'Sell supplies',
+        ['Sesbírat obilí'] = 'Harvest grain',
+        ['Umýváš láhve'] = 'Washing bottles',
+        ['Umít láhve'] = 'Wash bottles',
+        ['Nemáš špinavé láhve'] = 'No dirty bottles',
+        ['Nemáš houbičku na mytí, chceš umýt láhve pouze rukou?'] = 'No sponge, wash only with hands?',
+        ['Nemáš houbičku na mytí'] = 'No sponge for washing',
+        ['Nepovedlo se ti umýt flašku v ruce'] = 'Failed to wash the bottle by hand',
+        ['Kolik chceš koupit?'] = 'How many do you want to buy?',
+        ['Kolik chceš prodat?'] = 'How many do you want to sell?',
+        ['Nákup: '] = 'Purchase: ',
+        ['Prodej: '] = 'Sell: ',
+        ['Výkup surovin'] = 'Material Buyer',
+        ['lihovar obchod'] = 'Distillery Shop',
+        ['Probíhá výroba...'] = 'Processing...',
+        ['Výroba'] = 'Production',
+        ['Lihovar'] = 'Distillery',
+        ['Máš %s ks'] = 'You have %s pcs'
+    },
+    cz = {}
+}
+
+function _L(key)
+    local lang = Config.Lang[Config.Locale] or {}
+    return lang[key] or key
+end
+
 Config.RequiredJob = "lihovar"
 
 Config.HarvestCenter = vector3(349.99, 6517.27, 28.6)

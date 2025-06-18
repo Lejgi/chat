@@ -4,15 +4,15 @@ AddEventHandler('lihovar:washinganim', function()
     local count2 = lib.callback.await('lihovar:getItemCount2')
     if count <= 0 then
         lib.notify({
-            title = 'Lihovar',
-            description = 'Nemáš špinavé láhve',
+            title = _L('Lihovar'),
+            description = _L('Nemáš špinavé láhve'),
             type = 'error'
         })
         washing = false
     elseif count2 <= 0 then
         local alert = lib.alertDialog({
-            header = 'Lihovar',
-            content = 'Nemáš houbičku na mytí, chceš umýt láhve pouze rukou?',
+            header = _L('Lihovar'),
+            content = _L('Nemáš houbičku na mytí, chceš umýt láhve pouze rukou?'),
             centered = true,
             cancel = true
         })
@@ -25,7 +25,7 @@ AddEventHandler('lihovar:washinganim', function()
                     washing = true
                     exports.ox_inventory:Progress({
                         duration = 2500,
-                        label = "Umýváš láhve",
+                        label = _L('Umýváš láhve'),
                         useWhileDead = false,
                         canCancel = true,
                         disable = {
@@ -43,15 +43,15 @@ AddEventHandler('lihovar:washinganim', function()
                 end
             else
                 lib.notify({
-                    title = 'Lihovar',
-                    description = 'Nepovedlo se ti umýt flašku v ruce',
+                    title = _L('Lihovar'),
+                    description = _L('Nepovedlo se ti umýt flašku v ruce'),
                     type = 'error'
                 })
             end
         else
             lib.notify({
-                title = 'Lihovar',
-                description = 'Nemáš houbičku na mytí',
+                title = _L('Lihovar'),
+                description = _L('Nemáš houbičku na mytí'),
                 type = 'error'
             })
             washing = false
@@ -61,7 +61,7 @@ AddEventHandler('lihovar:washinganim', function()
             washing = true
             exports.ox_inventory:Progress({
                 duration = 2500,
-                label = "Umýváš láhve",
+                label = _L('Umýváš láhve'),
                 useWhileDead = false,
                 canCancel = true,
                 disable = {
@@ -90,7 +90,7 @@ Citizen.CreateThread(function()
         options = {
             {
                 event = "lihovar:washinganim",
-                label = "Umít láhve"
+                label = _L('Umít láhve')
             }
         },
         job = {"lihovar"},

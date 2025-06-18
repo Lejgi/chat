@@ -27,7 +27,7 @@ local icons = {
 }
 
 local labels = {
-    process = "Destilace piva"
+    process = _L('Destilace Piva')
 }
 
 local craftingZoneIds = {}
@@ -54,12 +54,12 @@ local function registerCraftingTargets()
             debug = false,
             options = {{
                 icon = icons[zone.type] or "fa-solid fa-cogs",
-                label = labels[zone.type] or "Výroba",
+                label = labels[zone.type] or _L('Výroba'),
                 onSelect = function()
                     local menuId = 'pivovar_menu_' .. zone.type
                     lib.registerContext({
                         id = menuId,
-                        title = labels[zone.type] or zone.label,
+                        title = labels[zone.type] or _L(zone.label),
                         options = Config.CraftOptions[zone.type] or {}
                     })
                     lib.showContext(menuId)
@@ -83,7 +83,7 @@ RegisterNetEvent('pivovar:playCraftAnim', function(type)
 
     lib.progressBar({
         duration = duration,
-        label = 'Probíhá výroba...',
+        label = _L('Probíhá výroba...'),
         useWhileDead = false,
         canCancel = false,
         disable = {

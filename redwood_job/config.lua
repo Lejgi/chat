@@ -1,5 +1,34 @@
 Config = {}
 
+Config.Locale = 'en'
+Config.Lang = {
+    en = {
+        ['Sber tabaku'] = 'Collect tobacco',
+        ['Vyroba Redwood'] = 'Redwood Production',
+        ['Koupe surovin'] = 'Buy Supplies',
+        ['Prodej produktu'] = 'Sell Products',
+        ['Sesbírat tabák'] = 'Harvest tobacco',
+        ['Nákup: '] = 'Purchase: ',
+        ['Prodej: '] = 'Sell: ',
+        ['Kolik chceš koupit?'] = 'How many do you want to buy?',
+        ['Kolik chceš prodat?'] = 'How many do you want to sell?',
+        ['Nemáš nic na prodej.'] = 'Nothing to sell.',
+        ['Výkup surovin'] = 'Material Buyer',
+        ['redwood obchod'] = 'Redwood Shop',
+        ['Zpracování tabáku'] = 'Tobacco Processing',
+        ['Výroba cigaret'] = 'Make Cigarettes',
+        ['Výroba doutníků'] = 'Make Cigars',
+        ['Balení'] = 'Packing',
+        ['Probíhá výroba...'] = 'Processing...'
+    },
+    cz = {}
+}
+
+function _L(key)
+    local lang = Config.Lang[Config.Locale] or {}
+    return lang[key] or key
+end
+
 Config.RequiredJob = "redwood"
 
 Config.HarvestCenter = vector3(2845.7898, 4608.7529, 47.9798)
