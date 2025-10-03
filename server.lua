@@ -4,182 +4,206 @@ local ultraCards = {"charizard", "blastoise","porygon", "omanyte", "omastar", "d
 local vCards = {"blastoisev", "charizardv", "mewv", "pikachuv", "snorlaxv", "venusaurv"}
 local vmaxCards = {"blastoisevmax", "mewtwogx", "snorlaxvmax", "venusaurvmax", "vmaxcharizard", "vmaxpikachu"}
 local rainbowCards = {"rainbowmewtwogx", "rainbowvmaxcharizard", "rainbowvmaxpikachu", "snorlaxvmaxrainbow"}
-local QBCore = exports['qb-core']:GetCoreObject()
 
-QBCore.Functions.CreateUseableItem("boosterbox", function(source, item)
-    local Player = QBCore.Functions.GetPlayer(source)
-	if Player.Functions.RemoveItem(item.name, 1, item.slot, item.info) then
-        TriggerClientEvent("Cards:Client:OpenCards", source, item.name)
-			local xPlayer = QBCore.Functions.GetPlayer(source)
-				xPlayer.Functions.AddItem('boosterpack',4)
-           Citizen.Wait(4000)
-        TriggerClientEvent('QBCore:Notify', source, 'You got 4 booster packs!')
-            Citizen.Wait(1000)
+local ESX = exports['es_extended']:getSharedObject()
+local Ox = exports.ox_inventory
+
+local registeredStashes = {}
+
+local function notify(source, description, notifType)
+    TriggerClientEvent('Cards:client:notify', source, {
+        description = description,
+        type = notifType or 'inform'
+    })
+end
+
+local function getPlayer(source)
+    local player = ESX.GetPlayerFromId(source)
+    if not player then
+        print(('[cards] failed to fetch player for source %s'):format(source))
     end
-end)
+    return player
+end
 
-QBCore.Functions.CreateCallback("Cards:server:Menu",function(source,cb)
-    local player = QBCore.Functions.GetPlayer(source)
-    local item = "...."
-        if player ~= nil then
-            if player.Functions.GetItemByName(item) then
-            cb(item,item.amount)
+local function getItemLabel(item)
+    if ESX.GetItemLabel then
+        local label = ESX.GetItemLabel(item)
+        if label then
+            return label
         end
     end
+
+    local items = ESX.Items
+    if items and items[item] and items[item].label then
+        return items[item].label
+    end
+
+    return item
+end
+
+local function ensurePlayerStash(player)
+    if not player then return nil end
+
+    local identifier = player.identifier or (player.getIdentifier and player:getIdentifier()) or tostring(player.source)
+    local stashId = ('poke_%s'):format(identifier)
+
+    if not registeredStashes[stashId] then
+        Ox:RegisterStash(stashId, 'Pokemon Storage', 160, 100000, true)
+        registeredStashes[stashId] = true
+    end
+
+    return stashId
+end
+
+math.randomseed(os.time())
+
+Ox:RegisterUsableItem('boosterbox', function(data, slot)
+    local source = data.source
+
+    if Ox:RemoveItem(source, 'boosterbox', 1, nil, slot) then
+        TriggerClientEvent('Cards:Client:OpenCards', source)
+        if not Ox:AddItem(source, 'boosterpack', 4) then
+            notify(source, 'Unable to give booster packs, refunding the box.', 'error')
+            Ox:AddItem(source, 'boosterbox', 1)
+            return
+        end
+
+        Wait(4000)
+        notify(source, 'You got 4 booster packs!', 'success')
+    end
 end)
 
-QBCore.Functions.CreateUseableItem("boosterpack", function(source, item)
-    local Player = QBCore.Functions.GetPlayer(source)  
-        TriggerClientEvent("Cards:Client:OpenPack", source)  
-        Citizen.Wait(4000)
-        TriggerClientEvent('QBCore:Notify', source, 'You got 4 cards!')
+Ox:RegisterUsableItem('boosterpack', function(data, slot)
+    local source = data.source
+
+    TriggerClientEvent('Cards:Client:OpenPack', source)
+    Wait(4000)
+    notify(source, 'You got 4 cards!', 'success')
 end)
 
-RegisterServerEvent('Cards:Server:RemoveItem')
+Ox:RegisterUsableItem('pokebox', function(data, slot)
+    local source = data.source
+    local player = getPlayer(source)
+    local stashId = ensurePlayerStash(player)
+
+    if stashId then
+        TriggerClientEvent('Cards:client:UseBox', source, stashId)
+    end
+end)
+
+RegisterNetEvent('Cards:Server:RemoveItem')
 AddEventHandler('Cards:Server:RemoveItem', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(source)
-    local pack = Player.Functions.GetItemByName("boosterpack")
+    local count = Ox:Search(src, 'count', 'boosterpack') or 0
 
-    if pack.amount == nil then
-        TriggerClientEvent('QBCore:Notify', source, 'You dont have a boosterpack!')
-    else
-        Player.Functions.RemoveItem('boosterpack',1)
+    if count <= 0 then
+        notify(src, 'You do not have a booster pack!', 'error')
+        return
     end
-  
-end)
 
-CreateThread(function()
-    math.randomseed(os.time())
+    Ox:RemoveItem(src, 'boosterpack', 1)
 end)
 
 RegisterServerEvent('Cards:Server:rewarditem')
 AddEventHandler('Cards:Server:rewarditem', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(source)
-    local pack = Player.Functions.GetItemByName("boosterpack")
     local card = ''
-
     local randomChance = math.random(1, 1000)
-   -- print(randomChance) -- if you wanna see the random chance
-    if randomChance <= 5 then 
-        card = rainbowCards[math.random(1,#rainbowCards)]         
-	elseif randomChance >= 6 and randomChance <= 19 then
+
+    if randomChance <= 5 then
+        card = rainbowCards[math.random(1,#rainbowCards)]
+    elseif randomChance >= 6 and randomChance <= 19 then
         card = vmaxCards[math.random(1, #vmaxCards)]
-
-	elseif randomChance >= 20 and randomChance <= 50 then
+    elseif randomChance >= 20 and randomChance <= 50 then
         card = vCards[math.random(1, #vCards)]
-
-	elseif randomChance >= 51 and randomChance <= 100 then
+    elseif randomChance >= 51 and randomChance <= 100 then
         card = ultraCards[math.random(1, #ultraCards)]
-
     elseif randomChance >= 101 and randomChance <= 399 then
         card = rareCards[math.random(1, #rareCards)]
-    else 
+    else
         card = basicCards[math.random(1, #basicCards)]
-	end
+    end
 
-    Citizen.Wait(10)
-    --print(card)
+    Wait(10)
 
-    if card ~= '' then        
+    if card ~= '' then
         TriggerClientEvent('Cards:Client:CardChoosed', src, card)
     else
-        TriggerClientEvent('QBCore:Notify', source, 'There is a problem in cards!')
-    end 
+        notify(src, 'There is a problem in cards!', 'error')
+    end
 end)
 
 RegisterServerEvent('Cards:Server:GetPokemon')
 AddEventHandler('Cards:Server:GetPokemon', function(pokemon)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    local pokemonName = QBCore.Shared.Items[pokemon].label
-    if pokemon ~= nil then
-        TriggerClientEvent("inventory:client:ItemBox", QBCore.Shared.Items[pokemon], "add")
-        TriggerClientEvent('QBCore:Notify', source, "You got "..pokemonName.. "")
-        Player.Functions.AddItem(pokemon, 1)
-    end  
-end)
+    if not pokemon then return end
 
-RegisterServerEvent("Cards:server:badges")
-AddEventHandler("Cards:server:badges", function(type)
-        local total = 0
-        local canBadge = true
-        local Player = QBCore.Functions.GetPlayer(source)
-            for k, v in pairs(Config.Badge[type].cards) do 
-                if Player.Functions.GetItemByName(k) ~= nil then 
-                    if Player.Functions.GetItemByName(k).amount < v then 
-                       canBadge = false
-                      TriggerClientEvent('QBCore:Notify', source, 'Come back when you have all the items for the '..Config.Badge[type].label, 'error', 5000) 
-                    end
-                else 
-                    canBadge = false
-                    TriggerClientEvent('QBCore:Notify', source, 'Come back when you have all the items for the '..Config.Badge[type].label, 'error', 5000)
-                    break                          
-                end
-            end
-                if canBadge then 
-                    TriggerClientEvent('QBCore:Notify', source, 'You got a '..Config.Badge[type].label..'!', 'success', 10000)
-                    for k, v in pairs(Config.Badge[type].cards) do
-                    Player.Functions.RemoveItem(k, v)
-
-                    end 
-                   Citizen.Wait(2000)
-                    Player.Functions.AddItem(type, 1)
-                end 
-end)
-
-QBCore.Functions.CreateUseableItem("pokebox", function(source, item)
-    local Player = QBCore.Functions.GetPlayer(source)
-    TriggerClientEvent("Cards:client:UseBox", source)
-    TriggerEvent("qb-log:server:CreateLog", "pokebox", "PokeBox", "white", "Player Opened The Box **"..GetPlayerName(source).."** Citizen ID : **"..Player.PlayerData.citizenid.. "**", false)
-end)
-
-function CanItemBeSaled(item)
-    local retval = false
-    if Config.AllowedItems[item] ~= nil then
-        retval = true
-    end
-    return retval
-end
-
-RegisterServerEvent("Cards:sellItem")
-AddEventHandler("Cards:sellItem", function(itemName, amount, price)
-	local xPlayer = QBCore.Functions.GetPlayer(source)
-    
-    if xPlayer.Functions.RemoveItem(itemName, amount) then
-        xPlayer.Functions.AddMoney('cash', price, 'Card-sell')
-        TriggerClientEvent("QBCore:Notify", source, "You sold " .. amount .. " " .. itemName .. " for $" .. price, "success", 5000)
+    if Ox:AddItem(src, pokemon, 1) then
+        notify(src, ('You got %s'):format(getItemLabel(pokemon)), 'success')
+    else
+        notify(src, 'Unable to add the selected card.', 'error')
     end
 end)
 
-QBCore.Functions.CreateCallback('Cards:server:get:drugs:items', function(source, cb)
+RegisterServerEvent('Cards:server:badges')
+AddEventHandler('Cards:server:badges', function(badgeType)
     local src = source
-    local AvailableDrugs = {}
-    local Player = QBCore.Functions.GetPlayer(src)
-    for k, v in pairs(Config.CardshopItems) do
-        local DrugsData = Player.Functions.GetItemByName(k)
-        if DrugsData ~= nil then
-            table.insert(AvailableDrugs, {['Item'] = DrugsData.name, ['Amount'] = DrugsData.amount})
+    local badgeConfig = Config.Badge[badgeType]
+
+    if not badgeConfig then
+        return
+    end
+
+    for item, amount in pairs(badgeConfig.cards) do
+        local count = Ox:Search(src, 'count', item) or 0
+        if count < amount then
+            notify(src, 'Come back when you have all the items for the '..badgeConfig.label, 'error')
+            return
         end
     end
-    cb(AvailableDrugs)
+
+    for item, amount in pairs(badgeConfig.cards) do
+        Ox:RemoveItem(src, item, amount)
+    end
+
+    Wait(2000)
+
+    if Ox:AddItem(src, badgeType, 1) then
+        notify(src, 'You got a '..badgeConfig.label..'!', 'success')
+    else
+        notify(src, 'Unable to give the badge reward, refunding your cards.', 'error')
+        for item, amount in pairs(badgeConfig.cards) do
+            Ox:AddItem(src, item, amount)
+        end
+    end
 end)
 
-function tprint (t, s)
-    for k, v in pairs(t) do
-        local kfmt = '["' .. tostring(k) ..'"]'
-        if type(k) ~= 'string' then
-            kfmt = '[' .. k .. ']'
-        end
-        local vfmt = '"'.. tostring(v) ..'"'
-        if type(v) == 'table' then
-            tprint(v, (s or '')..kfmt)
-        else
-            if type(v) ~= 'string' then
-                vfmt = tostring(v)
-            end
-            print(type(t)..(s or '')..kfmt..' = '..vfmt)
+RegisterServerEvent('Cards:sellItem')
+AddEventHandler('Cards:sellItem', function(itemName, amount, price)
+    local src = source
+    local player = getPlayer(src)
+
+    if not player or not itemName or not amount or amount <= 0 or not price or price <= 0 then
+        return
+    end
+
+    if Ox:RemoveItem(src, itemName, amount) then
+        player.addAccountMoney('money', price)
+        notify(src, ('You sold %d %s for $%d'):format(amount, itemName, price), 'success')
+    else
+        notify(src, 'You do not have enough of that item.', 'error')
+    end
+end)
+
+ESX.RegisterServerCallback('Cards:server:get:drugs:items', function(source, cb)
+    local available = {}
+
+    for item, _ in pairs(Config.CardshopItems) do
+        local count = Ox:Search(source, 'count', item) or 0
+        if count > 0 then
+            available[#available+1] = { ['Item'] = item, ['Amount'] = count }
         end
     end
-end 
+
+    cb(available)
+end)

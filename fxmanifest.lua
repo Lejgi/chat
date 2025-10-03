@@ -30,7 +30,8 @@ files {
 }
 
 dependencies {
-    'menuv'
+    'menuv',
+    'ox_inventory'
 }
 
 data_file 'DLC_ITYP_REQUEST' 'stream/booster_props.ytyp'

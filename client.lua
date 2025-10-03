@@ -1,4 +1,4 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+local ESX = exports['es_extended']:getSharedObject()
 local assert = assert
 local MenuV = assert(MenuV)
 
@@ -90,17 +90,24 @@ AddEventHandler("Cards:Client:OpenCards", function()
           AttachEntityToEntity(propbox, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 0xDEAD), 0.1, 0.1, 0.0, 0.0, 10.0, 90.0, false, false, false, false, 2, true)
         Citizen.Wait(5)
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "boxopen", 0.8)
-    QBCore.Functions.Progressbar("drink_something", "opening box..", 9500, false, true, {
-        disableMovement = false,
-        disableCarMovement = false,
-        disableMouse = false,
-        disableCombat = true,
-        disableInventory = true,
-    }, {}, {}, {}, function()-- Done
+
+    if lib.progressCircle({
+        duration = 9500,
+        position = 'bottom',
+        label = 'Opening box...',
+        useWhileDead = false,
+        canCancel = false,
+        disable = {
+            car = true,
+            combat = true,
+            move = false,
+            mouse = false,
+        }
+    }) then
         Citizen.Wait(1)
         DeleteEntity(propbox)
         ClearPedTasks(PlayerPedId())
-    end)
+    end
 end)
 
 RegisterNetEvent("Cards:Client:OpenPack")
@@ -113,14 +120,20 @@ AddEventHandler("Cards:Client:OpenPack", function()
           local PedCoords = GetEntityCoords(PlayerPedId())
           propcards = CreateObject(GetHashKey('prop_boosterpack_01'),PedCoords.x, PedCoords.y,PedCoords.z, true, true, true)
           AttachEntityToEntity(propcards, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 0xDEAD), 0.1, 0.1, 0.0, 70.0, 10.0, 90.0, false, false, false, false, 2, true)
-    QBCore.Functions.Progressbar("drink_something", "opening pack..", 3000, false, true, {
-        disableMovement = false,
-        disableCarMovement = false,
-        disableMouse = false,
-        disableCombat = true,
-        disableInventory = true,
-    }, {}, {}, {}, function()-- Done
-        TriggerServerEvent("InteractSound_SV:PlayOnSource", "dealfour", 0.9) 
+    if lib.progressCircle({
+        duration = 3000,
+        position = 'bottom',
+        label = 'Opening pack...',
+        useWhileDead = false,
+        canCancel = false,
+        disable = {
+            car = true,
+            combat = true,
+            move = false,
+            mouse = false,
+        }
+    }) then
+        TriggerServerEvent("InteractSound_SV:PlayOnSource", "dealfour", 0.9)
         Citizen.Wait(500)
         SetNuiFocus(true, true)
         SendNUIMessage({
@@ -130,7 +143,7 @@ AddEventHandler("Cards:Client:OpenPack", function()
         DeleteEntity(propcards)
         ClearPedTasks(PlayerPedId())
         TriggerServerEvent('Cards:Server:RemoveItem')
-    end)
+    end
 end)
 
 RegisterNUICallback('Rewardpokemon', function(data)
@@ -157,59 +170,36 @@ AddEventHandler("Cards:Client:CardChoosed", function(card)
 end)
 
 RegisterNetEvent("Cards:client:UseBox")
-AddEventHandler("Cards:client:UseBox", function()
+AddEventHandler("Cards:client:UseBox", function(stashId)
     TaskPlayAnim(PlayerPedId(), "clothingshirt", "try_shirt_positive_d", 8.0, 1.0, -1, 49, 0, 0, 0, 0)
     print('Box is Opening')
     TaskPlayAnim(PlayerPedId(), "mp_arresting" ,"a_uncuff" ,8.0, -8.0, -1, 1, 0, false, false, false )
     local PedCoords = GetEntityCoords(PlayerPedId())
     deckbox = CreateObject(GetHashKey('prop_deckbox_01'),PedCoords.x, PedCoords.y,PedCoords.z, true, true, true)
     AttachEntityToEntity(deckbox, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 0xDEAD), 0.1, 0.1, 0.0, 0.0, 10.0, 90.0, false, false, false, false, 2, true)
-    QBCore.Functions.Notify("Box is being opened...", "error")
-    QBCore.Functions.Progressbar("use_bag", "Box is being opened", 5000, false, true, {
-        disableMovement = false,
-        disableCarMovement = false,
-        disableMouse = false,
-        disableCombat = true,
-    }, {}, {}, {}, function() -- Done
-        local RLBagData = {
-            outfitData = {
-                ["bag"]   = { item = 41, texture = 0},  -- Nek / Das
-            }
+    lib.notify({description = "Box is being opened...", type = 'inform'})
+    if lib.progressCircle({
+        duration = 5000,
+        position = 'bottom',
+        label = 'Box is being opened',
+        useWhileDead = false,
+        canCancel = false,
+        disable = {
+            car = true,
+            combat = true,
+            move = false,
+            mouse = false,
         }
-        TriggerServerEvent("inventory:server:OpenInventory", "stash", "poke_"..QBCore.Functions.GetPlayerData().citizenid, {maxweight = 0.1, slots = 160})
-        TriggerEvent("inventory:client:SetCurrentStash", "poke_"..QBCore.Functions.GetPlayerData().citizenid)
+    }) then
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "snap", 1.2)
-        TaskPlayAnim(ped, "clothingshirt", "exit", 8.0, 1.0, -1, 49, 0, 0, 0, 0)
-        QBCore.Functions.Notify("Box has been opened successfully", "success")
+        TaskPlayAnim(PlayerPedId(), "clothingshirt", "exit", 8.0, 1.0, -1, 49, 0, 0, 0, 0)
+        lib.notify({description = "Box has been opened successfully", type = 'success'})
+        exports.ox_inventory:openInventory('stash', stashId)
         Citizen.Wait(10000)
         DeleteEntity(deckbox)
         ClearPedTasks(PlayerPedId())
-    end)
+    end
 end)
-
-
-Citizen.CreateThread(function()
-    while true do 
-        Citizen.Wait(2500)
-        local PlayerData = QBCore.Functions.GetPlayerData()
-        local ShopCoords = Config.CardshopLocation['Cardshop'].location
-        local ped = PlayerPedId()
-        local pos = GetEntityCoords(ped)
-        local dist = #(pos - ShopCoords)
-        if dist < 2.5 and not PlayerData.metadata["isdead"] and not PlayerData.metadata["inlaststand"] and not PlayerData.metadata["ishandcuffed"] and not IsPauseMenuActive() then
-            inshop = true
-        else 
-            inshop = false
-        end
-        if inshop == true then
-            Citizen.Wait(1000)
-            QBCore.Functions.TriggerCallback("Cards:server:Menu",function(item,amount)
-                print(item,amount)
-            end)
-        end
-    end 
-end)
-
 RegisterNetEvent("qb-pokemontcg:client:badgesound")
 AddEventHandler("qb-pokemontcg:client:badgesound", function()
     TriggerServerEvent("InteractSound_SV:PlayOnSource", "badge", 0.8)
@@ -233,9 +223,14 @@ AddEventHandler('Cards:client:openMenu', function()
     MenuV:OpenMenu(menu)
 end)
 
+RegisterNetEvent('Cards:client:notify')
+AddEventHandler('Cards:client:notify', function(data)
+    lib.notify(data)
+end)
+
 menu_button:On('select', function(item)
     menu2:ClearItems(true)
-    QBCore.Functions.TriggerCallback('Cards:server:get:drugs:items', function(CardsResult)
+    ESX.TriggerServerCallback('Cards:server:get:drugs:items', function(CardsResult)
         for k, v in pairs(CardsResult) do
             local itemName = v['Item']
             local itemCount = v['Amount']
